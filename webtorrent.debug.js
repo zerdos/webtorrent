@@ -7802,7 +7802,6 @@ function setup(env) {
 module.exports = setup;
 
 },{"ms":53}],32:[function(require,module,exports){
-(function (process){
 var once = require('once');
 
 var noop = function() {};
@@ -7825,7 +7824,6 @@ var eos = function(stream, opts, callback) {
 	var rs = stream._readableState;
 	var readable = opts.readable || (opts.readable !== false && stream.readable);
 	var writable = opts.writable || (opts.writable !== false && stream.writable);
-	var cancelled = false;
 
 	var onlegacyfinish = function() {
 		if (!stream.writable) onfinish();
@@ -7850,13 +7848,8 @@ var eos = function(stream, opts, callback) {
 	};
 
 	var onclose = function() {
-		process.nextTick(onclosenexttick);
-	};
-
-	var onclosenexttick = function() {
-		if (cancelled) return;
-		if (readable && !(rs && (rs.ended && !rs.destroyed))) return callback.call(stream, new Error('premature close'));
-		if (writable && !(ws && (ws.ended && !ws.destroyed))) return callback.call(stream, new Error('premature close'));
+		if (readable && !(rs && rs.ended)) return callback.call(stream, new Error('premature close'));
+		if (writable && !(ws && ws.ended)) return callback.call(stream, new Error('premature close'));
 	};
 
 	var onrequest = function() {
@@ -7881,7 +7874,6 @@ var eos = function(stream, opts, callback) {
 	stream.on('close', onclose);
 
 	return function() {
-		cancelled = true;
 		stream.removeListener('complete', onfinish);
 		stream.removeListener('abort', onclose);
 		stream.removeListener('request', onrequest);
@@ -7898,8 +7890,7 @@ var eos = function(stream, opts, callback) {
 
 module.exports = eos;
 
-}).call(this,require('_process'))
-},{"_process":62,"once":56}],33:[function(require,module,exports){
+},{"once":56}],33:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
